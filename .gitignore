@@ -1,0 +1,6 @@
+*.swp
+.bundle/
+data/
+/log/*
+!/log/.keep
+/config.yml

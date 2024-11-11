@@ -1,0 +1,32 @@
+---
+db: postgres:///moz_dev
+ext_db:
+  moz: mysql2:///moz
+tables:
+  forum_user:
+    table: user
+    linked:
+      - contact
+    fields:
+      userid:
+        name: id
+      username:
+        name: name
+      email:
+        name: email
+      usertitle:
+        name: user_title
+      password:
+        name: password
+      passworddate:
+        name: password_on
+        if_null:
+          klass: Date
+          method: new
+          params:
+            - 1970
+            - 1
+            - 1
+      salt:
+        name: salt
+

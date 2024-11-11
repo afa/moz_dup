@@ -1,0 +1,22 @@
+require:
+  - rubocop-sequel
+  - rubocop-rspec
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - app/models/similarity/*
+    - app/interactors/similarity/**/*
+
+Style/Documentation:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+
+Style/BlockDelimiters:
+  Enabled: false
+
+Style/MultilineBlockChain:
+  Enabled: false
