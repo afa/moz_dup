@@ -3,10 +3,31 @@ db: postgres:///moz_dev
 ext_db:
   moz: mysql2:///moz
 tables:
-  forum_user:
+  -
+    name: forum_user
     table: user
     linked:
-      - contact
+      contact:
+        fkey: user_id
+        fields:
+          homepage:
+            kind: 1
+            name: value
+          icq:
+            kind: 2
+            name: value
+          aim:
+            kind: 3
+            name: value
+          yahoo:
+            kind: 4
+            name: value
+          msn:
+            kind: 5
+            name: value
+          skype:
+            kind: 6
+            name: value
     fields:
       userid:
         name: id
@@ -29,4 +50,26 @@ tables:
             - 1
       salt:
         name: salt
-
+  -
+    name: forum_forum
+    table: forum
+    defer:
+      - parent_id
+    fields:
+      forumid:
+        name: id
+      title:
+        name: title
+      title_clean:
+        name: title_clean
+      description:
+        name: description
+      description_clean:
+        name: description_clean
+      parentid:
+        name: parent_id
+        check:
+          with: -1
+          set: null
+      displayorder:
+        name: position
