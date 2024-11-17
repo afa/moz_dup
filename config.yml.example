@@ -73,3 +73,32 @@ tables:
           set: null
       displayorder:
         name: position
+  -
+    name: forum_thread
+    table: thread
+    fields:
+      threadid:
+        name: id
+      title:
+        name: title
+      forumid:
+        name: forum_id
+      open:
+        name: open
+        convertor: int_to_boolean
+      visible:
+        name: visible
+        convertor: int_to_boolean
+      sticky:
+        name: sticky
+        convertor: int_to_boolean
+      lastpost:
+        name: last_post_at
+        convertor: int_to_time
+      posterusername:
+        name: poster_name
+      postuserid:
+        name: poster_id
+        check:
+          with: 0
+          set: null
