@@ -61,14 +61,27 @@ class Import < BaseInteractor
   end
 
   def try_with_defaults(val, params)
+    if params.key?('convertor')
+      return send(params['convertor'].to_sym, val)
+    end
+
     if params.key?('check') && params['check']['with'] == val
       return params['check']['set']
     end
+
     if val.nil? && params.key?('if_null')
       return Try { Object.const_get(params['if_null']['klass']) }
         .value_or(nil)
         &.public_send(params['if_null']['method'].to_sym, *(params['if_null']['params']))
     end
     val
+  end
+
+  def int_to_boolean(val)
+    val.to_i > 0
+  end
+
+  def int_to_time(val)
+    Time.at(val)
   end
 end
