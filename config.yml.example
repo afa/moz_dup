@@ -92,6 +92,9 @@ tables:
       sticky:
         name: sticky
         convertor: int_to_boolean
+      dateline:
+        name: created_at
+        convertor: int_to_time
       lastpost:
         name: last_post_at
         convertor: int_to_time
@@ -99,6 +102,57 @@ tables:
         name: poster_name
       postuserid:
         name: poster_id
+        check:
+          with: 0
+          set: null
+  -
+    name: forum_post
+    table: post
+    defer:
+      - parent_id
+    fields:
+      postid:
+        name: id
+      threadid:
+        name: thread_id
+        check:
+          with: 0
+          set: null
+      parentid:
+        name: parent_id
+        check:
+          with: 0
+          set: null
+      username:
+        name: user_name
+      userid:
+        name: user_id
+        check:
+          with: 0
+          set: null
+      title:
+        name: title
+      dateline:
+        name: created_at
+        convertor: int_to_time
+      pagetext:
+        name: text
+      allowsmile:
+        name: allow_smile
+        convertor: int_to_boolean
+      showsignature:
+        name: allow_signature
+        convertor: int_to_boolean
+      ipaddress:
+        name: ip_address
+      visible:
+        name: visible
+        convertor: int_to_boolean
+      attach:
+        name: has_attach
+        convertor: int_to_boolean
+      reportthreadid:
+        name: report_thread_id
         check:
           with: 0
           set: null
