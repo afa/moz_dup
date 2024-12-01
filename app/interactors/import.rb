@@ -19,8 +19,11 @@ class Import < BaseInteractor
 
   def copy_data(from, to, params)
     Try {
+      count = 0
       defer = params['defer'] || []
       postprocess = from.each_with_object({}) do |hsh, to_post|
+        print "\n#{count}" if count % 10_000 == 0
+        count += 1
         stor = {}
         data = params['fields'].each_with_object({}) do |(skey, dest), obj|
           val = hsh[skey.to_sym]
