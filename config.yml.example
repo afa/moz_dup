@@ -6,6 +6,7 @@ tables:
   -
     name: forum_user
     table: user
+    pk: userid
     linked:
       contact:
         fkey: user_id
@@ -53,6 +54,7 @@ tables:
   -
     name: forum_forum
     table: forum
+    pk: forumid
     defer:
       - parent_id
     fields:
@@ -76,6 +78,7 @@ tables:
   -
     name: forum_thread
     table: thread
+    pk: threadid
     fields:
       threadid:
         name: id
@@ -108,6 +111,7 @@ tables:
   -
     name: forum_post
     table: post
+    pk: postid
     defer:
       - parent_id
     fields:
