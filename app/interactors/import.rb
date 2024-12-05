@@ -21,15 +21,19 @@ class Import < BaseInteractor
     Try {
       count = 0
       defer = params['defer'] || []
-      postprocess = from.each_with_object({}) do |hsh, to_post|
-        print "\n#{count}" if count % 10_000 == 0
+      to_post = {}
+      from.order(params['pk'].to_sym).paged_each(skup_transaction: true) do |hsh|
+        if count % 10_000 == 0
+          print "\n#{count}"
+          GC.start
+        end
         count += 1
         stor = {}
         data = params['fields'].each_with_object({}) do |(skey, dest), obj|
           val = hsh[skey.to_sym]
           if defer.include?(dest['name'])
             stor[dest['name'].to_sym] = try_with_defaults(val, dest)
-            val = nil
+            obj[dest['name'].to_sym] = nil
           else
             obj[dest['name'].to_sym] = try_with_defaults(val, dest)
           end
@@ -54,13 +58,13 @@ class Import < BaseInteractor
         end
         print '.'
       end
-      postprocess.each do |id, data|
+      to_post.each do |id, data|
         to.where(id: id).update(data)
       end
       puts ''
     }
       .to_result
-      .alt_map { |d| pp d; d }
+      .or { |d| pp d, d.backtrace; Failure(d) }
   end
 
   def try_with_defaults(val, params)
