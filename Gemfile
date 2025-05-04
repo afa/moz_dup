@@ -38,5 +38,7 @@ end
 
 group :test do
   gem 'rspec'
+  gem 'simplecov', require: false
+  gem 'simplecov-cobertura', require: false
   gem 'database_cleaner-sequel'
 end

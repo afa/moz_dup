@@ -15,6 +15,7 @@ GEM
       database_cleaner-core (~> 2.0.0)
       sequel
     diff-lcs (1.5.0)
+    docile (1.4.1)
     dry-configurable (0.13.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.6)
@@ -132,6 +133,15 @@ GEM
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
     sequel (5.55.0)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-cobertura (2.1.0)
+      rexml
+      simplecov (~> 0.19)
+    simplecov-html (0.13.1)
+    simplecov_json_formatter (0.1.4)
     sinatra (2.2.4)
       mustermann (~> 2.0)
       rack (~> 2.2)
@@ -178,6 +188,8 @@ DEPENDENCIES
   rubocop-rspec
   rubocop-sequel
   sequel
+  simplecov
+  simplecov-cobertura
   sinatra (~> 2.2.3)
   sinatra-contrib
   thor

@@ -7,7 +7,7 @@ class Import < BaseInteractor
       puts name
       ds_from = db[name.to_sym]
       ds_to = App.db[params['table'].to_sym]
-      params.fetch('linked', {}).keys.each do |tbl|
+      params.fetch('linked', {}).each_key do |tbl|
         App.db[tbl.to_sym].truncate(cascade: true)
       end
       ds_to.truncate(cascade: true)
@@ -23,7 +23,7 @@ class Import < BaseInteractor
       defer = params['defer'] || []
       to_post = {}
       from.order(params['pk'].to_sym).paged_each(skup_transaction: true) do |hsh|
-        if count % 10_000 == 0
+        if (count % 10_000).zero?
           print "\n#{count}"
           GC.start
         end
@@ -39,16 +39,14 @@ class Import < BaseInteractor
           end
         end
         item = to.insert_select(data)
-        unless stor.empty?
-          to_post[item[:id]] = stor
-        end
+        to_post[item[:id]] = stor unless stor.empty?
         params.fetch('linked', {}).each do |tbl, opts|
           fkey = opts['fkey'].to_sym
           opts['fields'].each do |skey, rules|
             val = hsh[skey.to_sym]
             next if val.nil? || val == ''
 
-            h = rules.reject { |k, _v| k == 'name' }.transform_keys(&:to_sym)
+            h = rules.except('name').transform_keys(&:to_sym)
             h[rules['name'].to_sym] = val
             h[fkey] = item[:id]
 
@@ -59,7 +57,7 @@ class Import < BaseInteractor
         print '.'
       end
       to_post.each do |id, data|
-        to.where(id: id).update(data)
+        to.where(id:).update(data)
       end
       puts ''
     }
@@ -68,24 +66,20 @@ class Import < BaseInteractor
   end
 
   def try_with_defaults(val, params)
-    if params.key?('convertor')
-      return send(params['convertor'].to_sym, val)
-    end
+    return send(params['convertor'].to_sym, val) if params.key?('convertor')
 
-    if params.key?('check') && params['check']['with'] == val
-      return params['check']['set']
-    end
+    return params['check']['set'] if params.key?('check') && params['check']['with'] == val
 
     if val.nil? && params.key?('if_null')
       return Try { Object.const_get(params['if_null']['klass']) }
-        .value_or(nil)
-        &.public_send(params['if_null']['method'].to_sym, *(params['if_null']['params']))
+             .value_or(nil)
+             &.public_send(params['if_null']['method'].to_sym, *(params['if_null']['params']))
     end
     val
   end
 
   def int_to_boolean(val)
-    val.to_i > 0
+    val.to_i.positive?
   end
 
   def int_to_time(val)
