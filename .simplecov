@@ -2,6 +2,10 @@ require 'simplecov'
 require 'simplecov-cobertura'
 SimpleCov.profiles.define 'ruby' do
 end
+
+SimpleCov.enable_coverage :branch
+SimpleCov.primary_coverage :branch
+
 SimpleCov.start('ruby') do
   formatter SimpleCov::Formatter::MultiFormatter.new([SimpleCov::Formatter::SimpleFormatter,
                                                       SimpleCov::Formatter::CoberturaFormatter])
@@ -30,4 +34,3 @@ end
 #     result.format! if ParallelTests.number_of_running_processes <= 1
 #   end
 # end
-

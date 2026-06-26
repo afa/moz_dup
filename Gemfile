@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
@@ -12,6 +12,7 @@ gem 'sinatra-contrib'
 gem 'multi_json'
 gem 'oj'
 gem 'sequel'
+gem 'logger'
 
 # Dry
 gem 'dry-configurable', '~>0.13.0'

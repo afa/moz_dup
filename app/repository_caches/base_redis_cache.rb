@@ -2,6 +2,7 @@
 
 class BaseRedisCache
   extend Dry::Initializer
+
   option :redis, default: -> { RedisClient.instance }
 
   DEFAULT_REDIS_TTL = 10.minutes.to_i

@@ -3,31 +3,31 @@ class Import < BaseInteractor
   param :tables
   def call
     tables.each do |params|
-      name = params['name']
-      puts name
-      ds_from = db[name.to_sym]
-      ds_to = App.db[params['table'].to_sym]
-      params.fetch('linked', {}).each_key do |tbl|
-        App.db[tbl.to_sym].truncate(cascade: true)
-      end
-      ds_to.truncate(cascade: true)
-      yield copy_data(ds_from, ds_to, params)
+      import_table(params)
     end
   end
 
   private
 
+  def import_table(table_params)
+    name = table_params['name']
+    puts name
+    ds_from = db[name.to_sym]
+    ds_to = App.db[table_params['table'].to_sym]
+    table_params.fetch('linked', {}).each_key do |tbl|
+      App.db[tbl.to_sym].truncate(cascade: true)
+    end
+    ds_to.truncate(cascade: true)
+    yield copy_data(ds_from, ds_to, table_params)
+  end
+
   def copy_data(from, to, params)
     Try {
-      count = 0
-      defer = params['defer'] || []
-      to_post = {}
-      from.order(params['pk'].to_sym).paged_each(skup_transaction: true) do |hsh|
-        if (count % 10_000).zero?
-          print "\n#{count}"
-          GC.start
-        end
-        count += 1
+      defer = params.fetch('defer', [])
+      postprocessable = {}
+      clean_count
+      from.order(params['pk'].to_sym).paged_each(skup_transaction: true) do |hsh| # skup??
+        count_iteration_with_gc
         stor = {}
         data = params['fields'].each_with_object({}) do |(skey, dest), obj|
           val = hsh[skey.to_sym]
@@ -39,7 +39,7 @@ class Import < BaseInteractor
           end
         end
         item = to.insert_select(data)
-        to_post[item[:id]] = stor unless stor.empty?
+        postprocessable[item[:id]] = stor unless stor.empty?
         params.fetch('linked', {}).each do |tbl, opts|
           fkey = opts['fkey'].to_sym
           opts['fields'].each do |skey, rules|
@@ -56,33 +56,31 @@ class Import < BaseInteractor
         end
         print '.'
       end
-      to_post.each do |id, data|
+      postprocessable.each do |id, data|
         to.where(id:).update(data)
       end
       puts ''
     }
       .to_result
-      .or { |d| pp d, d.backtrace; Failure(d) }
+      .or { |d|
+        pp d, d.backtrace
+        Failure(d)
+      }
   end
 
-  def try_with_defaults(val, params)
-    return send(params['convertor'].to_sym, val) if params.key?('convertor')
-
-    return params['check']['set'] if params.key?('check') && params['check']['with'] == val
-
-    if val.nil? && params.key?('if_null')
-      return Try { Object.const_get(params['if_null']['klass']) }
-             .value_or(nil)
-             &.public_send(params['if_null']['method'].to_sym, *(params['if_null']['params']))
+  def count_iteration_with_gc
+    if (@count % 10_000).zero?
+      print "\n#{count}"
+      GC.start
     end
-    val
+    @count += 1
   end
 
-  def int_to_boolean(val)
-    val.to_i.positive?
+  def clean_count
+    @count = 0
   end
 
-  def int_to_time(val)
-    Time.at(val)
+  def try_with_defaults(value, item_config)
+    Import::ConvertItemWithDefaults.call(value:, item_config:)
   end
 end

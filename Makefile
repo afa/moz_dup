@@ -1,6 +1,13 @@
 all: lint # test
 lint: rubocop reek
-# test: rspec
+
+.PHONY: spec
+spec: Gemfile.lock
+	bundle exec rspec -r ./boot ${SPEC_PARAMS}&& Say success; Say done
+fast-spec:
+	bundle exec rspec -r boot --fail-fast=1 ${SPEC_PARAMS}&& Say success; Say done
+test-flake:
+	while rspec -r boot --fail-fast=1 ; do; done
 
 Gemfile.lock: Gemfile
 	bundle install

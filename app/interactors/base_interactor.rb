@@ -1,6 +1,11 @@
+require 'dry/types'
 require 'dry/initializer'
 require 'dry/monads'
 class BaseInteractor
+  module Types
+    include Dry::Types()
+  end
+
   extend Dry::Initializer
 
   class << self
@@ -10,8 +15,8 @@ class BaseInteractor
     end
 
     # Instantiates and calls the service at once
-    def call(*args, **kwargs, &)
-      new(*args, **kwargs).call(&)
+    def call(*, **, &)
+      new(*, **).call(&)
     end
   end
 end
