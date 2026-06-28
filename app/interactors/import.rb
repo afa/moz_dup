@@ -2,9 +2,14 @@ class Import < BaseInteractor
   param :db
   param :tables
   def call
-    tables.each do |params|
-      import_table(params)
-    end
+    import_tables(tables.find { it['name'] == 'forum_usergroup' })
+    import_tables(tables.find { it['name'] == 'forum_user' })
+    import_tables(tables.find { it['name'] == 'forum_forum' })
+    import_tables(tables.find { it['name'] == 'forum_thread' })
+    import_tables(tables.find { it['name'] == 'forum_post' })
+    # tables.each do |params|
+    #   import_table(params)
+    # end
   end
 
   private
@@ -23,36 +28,17 @@ class Import < BaseInteractor
 
   def copy_data(from, to, params)
     Try {
-      defer = params.fetch('defer', [])
       postprocessable = {}
       clean_count
-      from.order(params['pk'].to_sym).paged_each(skup_transaction: true) do |hsh| # skup??
+      from.order(params['pk'].to_sym).paged_each(skip_transaction: true) do |hsh|
         count_iteration_with_gc
-        stor = {}
-        data = params['fields'].each_with_object({}) do |(skey, dest), obj|
-          val = hsh[skey.to_sym]
-          if defer.include?(dest['name'])
-            stor[dest['name'].to_sym] = try_with_defaults(val, dest)
-            obj[dest['name'].to_sym] = nil
-          else
-            obj[dest['name'].to_sym] = try_with_defaults(val, dest)
-          end
-        end
+
+        data, stor = Import::FillItemData.call(table_config: params, item_hash: hsh)
         item = to.insert_select(data)
         postprocessable[item[:id]] = stor unless stor.empty?
-        params.fetch('linked', {}).each do |tbl, opts|
-          fkey = opts['fkey'].to_sym
-          opts['fields'].each do |skey, rules|
-            val = hsh[skey.to_sym]
-            next if val.nil? || val == ''
-
-            h = rules.except('name').transform_keys(&:to_sym)
-            h[rules['name'].to_sym] = val
-            h[fkey] = item[:id]
-
-            App.db[tbl.to_sym].insert(h)
-            print '+'
-          end
+        linked_inserts = Import::FillLinkedData.call(table_config: params, item_id: item[:id])
+        linked_inserts.each do |tbl, list|
+          App.db[tbl].multi_insert(list)
         end
         print '.'
       end
@@ -78,9 +64,5 @@ class Import < BaseInteractor
 
   def clean_count
     @count = 0
-  end
-
-  def try_with_defaults(value, item_config)
-    Import::ConvertItemWithDefaults.call(value:, item_config:)
   end
 end

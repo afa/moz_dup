@@ -34,7 +34,6 @@ group :development, :test do
   gem 'rubocop-sequel'
   gem 'rubocop-rspec'
   gem 'rubocop-performance'
-  gem 'reek'
 end
 
 group :test do

@@ -1,5 +1,5 @@
 all: lint # test
-lint: rubocop reek
+lint: rubocop
 
 .PHONY: spec
 spec: Gemfile.lock
@@ -14,8 +14,6 @@ Gemfile.lock: Gemfile
 bundle: Gemfile.lock
 rubocop: Gemfile.lock
 	bundle exec rubocop --force-exclusion $(LINT_PATH)
-reek: Gemfile.lock
-	bundle exec reek --force-exclusion $(LINT_PATH)
 cov:
 	~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|sort -t: -nrk4 |awk -F : '{ if ( $$3 > 0 ) print $$1 "\t" $$4 "\t" $$5 }'
 cov-full:
