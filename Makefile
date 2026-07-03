@@ -15,9 +15,11 @@ bundle: Gemfile.lock
 rubocop: Gemfile.lock
 	bundle exec rubocop --force-exclusion $(LINT_PATH)
 cov:
-	~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|sort -t: -nrk4 |awk -F : '{ if ( $$3 > 0 ) print $$1 "\t" $$4 "\t" $$5 }'
+#       ~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|sort -t: -nrk4 |awk -F : '{ if ( $$3 > 0 ) print $$1 "\t" $$4 "\t" $$5 }'
+	@ruby -r ./lib/tasks/coverage -e 'Coverage.report'
 cov-full:
-	~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|awk -F : '{ if ( $$3 > 0 ) print $$0 }'
+#       ~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|awk -F : '{ if ( $$3 > 0 ) print $$0 }'
+	@ruby -r ./lib/tasks/coverage -e 'Coverage.report(full: true)'
 # rspec: Gemfile.lock
 # 	DATABASE_URL=postgres:///blog_test bundle exec rspec -r./boot $(TEST_PATH)
 # run:

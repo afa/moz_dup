@@ -1,12 +1,15 @@
 class Import < BaseInteractor
+  attr_reader :count
+
   param :db
   param :tables
+
   def call
-    import_tables(tables.find { it['name'] == 'forum_usergroup' })
-    import_tables(tables.find { it['name'] == 'forum_user' })
-    import_tables(tables.find { it['name'] == 'forum_forum' })
-    import_tables(tables.find { it['name'] == 'forum_thread' })
-    import_tables(tables.find { it['name'] == 'forum_post' })
+    import_table(tables.find { it['name'] == 'forum_usergroup' })
+    import_table(tables.find { it['name'] == 'forum_user' })
+    import_table(tables.find { it['name'] == 'forum_forum' })
+    import_table(tables.find { it['name'] == 'forum_thread' })
+    import_table(tables.find { it['name'] == 'forum_post' })
     # tables.each do |params|
     #   import_table(params)
     # end
@@ -36,7 +39,7 @@ class Import < BaseInteractor
         data, stor = yield Import::FillItemData.call(table_config: params, item_hash: hsh)
         item = to.insert_select(data)
         postprocessable[item[:id]] = stor unless stor.empty?
-        linked_inserts = yield Import::FillLinkedData.call(table_config: params, item_id: item[:id])
+        linked_inserts = yield Import::FillLinkedData.call(table_config: params, item_hash: hsh, item_id: item[:id])
         linked_inserts.each do |tbl, list|
           App.db[tbl].multi_insert(list)
         end
@@ -48,14 +51,11 @@ class Import < BaseInteractor
       puts ''
     }
       .to_result
-      .or { |d|
-        pp d, d.backtrace
-        Failure(d)
-      }
+      .or { Failure(it) }
   end
 
   def count_iteration_with_gc
-    if (@count % 10_000).zero?
+    if count > 0 && (count % 10_000).zero?
       print "\n#{count}"
       GC.start
     end
