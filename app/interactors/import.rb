@@ -33,10 +33,10 @@ class Import < BaseInteractor
       from.order(params['pk'].to_sym).paged_each(skip_transaction: true) do |hsh|
         count_iteration_with_gc
 
-        data, stor = Import::FillItemData.call(table_config: params, item_hash: hsh)
+        data, stor = yield Import::FillItemData.call(table_config: params, item_hash: hsh)
         item = to.insert_select(data)
         postprocessable[item[:id]] = stor unless stor.empty?
-        linked_inserts = Import::FillLinkedData.call(table_config: params, item_id: item[:id])
+        linked_inserts = yield Import::FillLinkedData.call(table_config: params, item_id: item[:id])
         linked_inserts.each do |tbl, list|
           App.db[tbl].multi_insert(list)
         end

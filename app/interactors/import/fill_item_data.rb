@@ -15,7 +15,7 @@ class Import::FillItemData < BaseInteractor
         obj[name] = val
       end
     end
-    [table_config, stor]
+    Success([table_config, stor])
   end
 
   def try_with_defaults(value, item_config)

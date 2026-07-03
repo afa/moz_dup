@@ -1,7 +1,7 @@
 require 'simplecov'
 require 'simplecov-cobertura'
-# SimpleCov.profiles.define 'ruby' do
-# end
+SimpleCov.profiles.define 'ruby' do
+end
 
 SimpleCov.enable_coverage :branch
 SimpleCov.primary_coverage :branch
