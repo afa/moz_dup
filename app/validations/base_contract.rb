@@ -1,9 +1,9 @@
 require 'dry-validation'
 
-module Types
-  include Dry::Types()
-end
-
 Dry::Validation.load_extensions(:monads)
 
-class BaseContract < Dry::Validation::Contract; end
+class BaseContract < Dry::Validation::Contract
+  module Types
+    include Dry::Types()
+  end
+end

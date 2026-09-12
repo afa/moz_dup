@@ -1,14 +1,25 @@
 all: lint # test
-lint: rubocop reek
-# test: rspec
+lint: rubocop
+
+.PHONY: spec
+spec: Gemfile.lock
+	bundle exec rspec -r ./boot ${SPEC_PARAMS}&& Say success; Say done
+fast-spec:
+	bundle exec rspec -r boot --fail-fast=1 ${SPEC_PARAMS}&& Say success; Say done
+test-flake:
+	while rspec -r boot --fail-fast=1 ; do; done
 
 Gemfile.lock: Gemfile
 	bundle install
 bundle: Gemfile.lock
 rubocop: Gemfile.lock
 	bundle exec rubocop --force-exclusion $(LINT_PATH)
-reek: Gemfile.lock
-	bundle exec reek --force-exclusion $(LINT_PATH)
+cov:
+#       ~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|sort -t: -nrk4 |awk -F : '{ if ( $$3 > 0 ) print $$1 "\t" $$4 "\t" $$5 }'
+	@ruby -r ./lib/tasks/coverage -e 'Coverage.report'
+cov-full:
+#       ~/.local/bin/pycobertura show --format csv --delimiter : coverage/coverage.xml|awk -F : '{ if ( $$3 > 0 ) print $$0 }'
+	@ruby -r ./lib/tasks/coverage -e 'Coverage.report(full: true)'
 # rspec: Gemfile.lock
 # 	DATABASE_URL=postgres:///blog_test bundle exec rspec -r./boot $(TEST_PATH)
 # run:
@@ -30,3 +41,5 @@ server: Gemfile.lock
 	bundle exec rackup
 sh: Gemfile.lock
 	bundle exec racksh
+import:
+	thor import:apply

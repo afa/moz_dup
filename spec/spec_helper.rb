@@ -15,6 +15,7 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 require_relative '../app'
+require 'simplecov'
 require 'database_cleaner/sequel'
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }

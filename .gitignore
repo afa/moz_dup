@@ -4,3 +4,4 @@ data/
 /log/*
 !/log/.keep
 /config.yml
+/coverage
