@@ -41,3 +41,5 @@ server: Gemfile.lock
 	bundle exec rackup
 sh: Gemfile.lock
 	bundle exec racksh
+import:
+	thor import:apply

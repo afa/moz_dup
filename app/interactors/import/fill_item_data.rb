@@ -5,7 +5,7 @@ class Import::FillItemData < BaseInteractor
   def call
     stor = {}
     defer = table_config.fetch('defer', []).map(&:to_sym)
-    table_config['fields'].each_with_object({}) do |(skey, dest), obj|
+    data = table_config['fields'].each_with_object({}) do |(skey, dest), obj|
       name = dest['name'].to_sym
       val = yield try_with_defaults(item_hash[skey.to_sym], dest)
       if defer.include?(name)
@@ -15,7 +15,7 @@ class Import::FillItemData < BaseInteractor
         obj[name] = val
       end
     end
-    Success([table_config, stor])
+    Success([data, stor])
   end
 
   def try_with_defaults(value, item_config)
